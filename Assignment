@@ -1,0 +1,111 @@
+//Roy Mwangi - SCT221-0232/2022
+//Douglas Bett - SCT221-0257/2022
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+} Node;
+
+// Helper function to create a new Node
+Node* createNode(int data) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Function to insert data into the BST
+Node* insert(Node* root, int data) {
+    if (root == NULL) return createNode(data);
+
+    if (data < root->data)
+        root->left = insert(root->left, data);
+    else if (data > root->data)
+        root->right = insert(root->right, data);
+
+    return root;
+}
+
+// Function to determine the height of the BST
+int height(Node* node) {
+    if (node == NULL)
+        return -1; // Return -1 for height of an empty tree
+    else {
+        int leftHeight = height(node->left);
+        int rightHeight = height(node->right);
+        return (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
+    }
+}
+
+// Helper function to find the minimum value node
+Node* minNode(Node* node) {
+    Node* current = node;
+    while (current && current->left != NULL)
+        current = current->left;
+    return current;
+}
+
+// Function to delete a node from the BST
+Node* deleteNode(Node* root, int data) {
+    if (root == NULL) return root;
+
+    if (data < root->data)
+        root->left = deleteNode(root->left, data);
+    else if (data > root->data)
+        root->right = deleteNode(root->right, data);
+    else {
+        // Node with only one child or no child
+        if (root->left == NULL) {
+            Node* temp = root->right;
+            free(root);
+            return temp;
+        } else if (root->right == NULL) {
+            Node* temp = root->left;
+            free(root);
+            return temp;
+        }
+
+        // Node with two children: Get the in-order successor
+        Node* temp = minNode(root->right);
+        root->data = temp->data;
+        root->right = deleteNode(root->right, temp->data);
+    }
+    return root;
+}
+
+// Helper function to print level and height of a given node
+void printLevelAndHeight(Node* root, int data, int level) {
+    if (root == NULL)
+        return;
+
+    if (root->data == data) {
+        printf("Node %d is at level %d and its height is %d.\n", data, level, height(root));
+    } else if (data < root->data) {
+        printLevelAndHeight(root->left, data, level + 1);
+    } else {
+        printLevelAndHeight(root->right, data, level + 1);
+    }
+}
+
+int main() {
+    Node* root = NULL;
+    // Assuming the array elements are inserted in the given order
+    int arr[] = {30, 20, 40, 10, 25, 35, 45, 5, 15};
+    int arrSize = sizeof(arr)/sizeof(arr[0]);
+    for (int i = 0; i < arrSize; i++) {
+        root = insert(root, arr[i]);
+    }
+
+    printf("Height of the BST: %d\n", height(root));
+
+    // Example of deleting a node, printing the height and level of a node
+    root = deleteNode(root, 20); // Delete node with value 20
+    printLevelAndHeight(root, 35, 1); // Print level and height of node with value 35
+
+    return 0;
+}
